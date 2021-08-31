@@ -19,49 +19,41 @@ def CreateServer():
     return so
 
 def Connection(server):
-    print('=== Connection ===')
     # socket, str, number
     client, (ip, port) = server.accept()
-    print(" * address = %s:%d" % (
-        ip,
-        port
-        ))
-
+    #print(" * address = %s:%d" % (
+    #    ip,
+    #    port
+    #    ))
     potential_readers.add( client )
 
-def HttpProc(client):
+
+def ChatProc(client):
     # <class bytes>
     print(' * RECV')
     # When a recv() returns 0 bytes, it means
     # the other side has closed (or is in the
     # process of closing) the connection.
     req = client.recv(4096)
-    print(' * RECV ok')
-    print(req)
-    print(' * RECV end')
-
-    resp = MakeResponse(req)
-    client.send(resp)
-    client.close()
-
-    potential_readers.discard( client )
+    print(' * RECV ok', len(req))
+    if len(req) == 0:
+        client.close()
+        potential_readers.discard( client )
+    else:
+        print(req)
+        print(' * RECV end')
+        resp = MakeResponse(req)
+        client.send(resp)
 
 
 def MakeResponse(req):
-
     content = 'hello java world';
-
     payload = content.encode('utf8')
+    return payload
 
-    parts = [
-            b'HTTP/1.0 200 OK',
-            b'Content-Length: %d' % len(payload),
-            b'',
-            payload
-            ]
-    return b'\r\n'.join(parts)
 
 # -------------------------------
+ClientNo = 1
 so = CreateServer()
 
 potential_readers = set()
@@ -77,15 +69,13 @@ while True:
     rs, ws, es = select.select(
             potential_readers,
             potential_writers,
-            potential_errs,
-            10000
-            )
+            potential_errs)
 
     for s in rs:
         if s is so:
             Connection(s)
         else:
-            HttpProc(s)
+            ChatProc(s)
 
 so.close()
 # -------------------------------
