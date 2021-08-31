@@ -1,8 +1,10 @@
 
 import socket
+import select
 
 
 def CreateServer():
+    # create an INET, STREAMing socket
     so = socket.socket(
             socket.AF_INET,
             socket.SOCK_STREAM)
@@ -16,8 +18,8 @@ def CreateServer():
     so.listen(5)
     return so
 
-def HttpProc(server):
-    print('=== HTTP PROC ===')
+def Connection(server):
+    print('=== Connection ===')
     # socket, str, number
     client, (ip, port) = server.accept()
     print(" * address = %s:%d" % (
@@ -25,8 +27,14 @@ def HttpProc(server):
         port
         ))
 
+    potential_readers.add( client )
+
+def HttpProc(client):
     # <class bytes>
     print(' * RECV')
+    # When a recv() returns 0 bytes, it means
+    # the other side has closed (or is in the
+    # process of closing) the connection.
     req = client.recv(4096)
     print(' * RECV ok')
     print(req)
@@ -35,6 +43,9 @@ def HttpProc(server):
     resp = MakeResponse(req)
     client.send(resp)
     client.close()
+
+    potential_readers.discard( client )
+
 
 def MakeResponse(req):
 
@@ -53,8 +64,28 @@ def MakeResponse(req):
 # -------------------------------
 so = CreateServer()
 
+potential_readers = set()
+potential_writers = set()
+potential_errs    = set()
+
+potential_readers.add( so )
+
+
 while True:
-    HttpProc(so)
+    print('.')
+
+    rs, ws, es = select.select(
+            potential_readers,
+            potential_writers,
+            potential_errs,
+            10000
+            )
+
+    for s in rs:
+        if s is so:
+            Connection(s)
+        else:
+            HttpProc(s)
 
 so.close()
 # -------------------------------
