@@ -1,9 +1,21 @@
 import tkinter as tk
 import client as cli
 
+
+# 测试多个客户端的性能
+def test():
+    global pool
+    pool = set()
+
+    print('begin creation')
+    # 创建一组客户端
+    for i in range(100):
+        pool.add( cli.Client() )
+    print('create 100 client complete!')
+
 def CreateWindow():
     def OnBtnUp(event):
-        cli.main()
+        test()
     app = tk.Tk()
     app['width']  = 400
     app['height'] = 300

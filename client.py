@@ -1,7 +1,7 @@
 import socket
 
 
-class ChatClient:
+class Client:
 
     def __init__(self):
         so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -27,7 +27,7 @@ class ChatClient:
 
 
 def main():
-    inst = ChatClient()
+    inst = Client()
     inst.send('hello java world')
     txt = inst.recv()
     print('RECV:', txt)
