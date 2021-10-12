@@ -1,4 +1,6 @@
 import socket
+import tkinter as tk
+
 
 def CreateClient():
     so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,12 +19,33 @@ def RecvMessage(conn):
         raise RuntimeError()
     return txt.decode('utf8')
 
-def main():
+def main_old():
     so = CreateClient()
     SendMessage(so, 'hello java world')
     txt = RecvMessage(so)
     print(txt)
     so.close()
+
+
+def UI_CreateWindow():
+    def OnBtnUp(event):
+        main_old()
+    app = tk.Tk()
+    app['width']  = 400
+    app['height'] = 300
+    app.bind('<ButtonRelease-1>', OnBtnUp)
+    return app
+
+
+# Entry 
+def main():
+    app = UI_CreateWindow()
+    print('Click on Window to send message ...')
+    print('-----------------------------------')
+    app.mainloop()
+    print('-----------------------------------')
+    print('End')
+
 
 
 if __name__ == '__main__':
