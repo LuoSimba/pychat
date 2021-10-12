@@ -1,52 +1,37 @@
 import socket
-import tkinter as tk
 
 
-def CreateClient():
-    so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    so.connect(("localhost", 9999))
-    return so
+class ChatClient:
 
-def SendMessage(conn, msg):
-    print("SEND:", msg)
-    sent = conn.send( msg.encode('utf8') )
-    if sent == 0:
-        raise RuntimeError()
+    def __init__(self):
+        so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        so.connect(('localhost', 9999))
+        self.so = so
 
-def RecvMessage(conn):
-    txt = conn.recv(4096)
-    if txt == b'':
-        raise RuntimeError()
-    return txt.decode('utf8')
+    def send(self, msg):
+        print("SEND: ", msg)
+        sent = self.so.send( msg.encode('utf8') )
+        if sent == 0:
+            raise RuntimeError()
+        print("SEND success")
 
-def main_old():
-    so = CreateClient()
-    SendMessage(so, 'hello java world')
-    txt = RecvMessage(so)
-    print(txt)
-    so.close()
+    def recv(self):
+        txt = self.so.recv(4096)
+        if txt == b'':
+            raise RuntimeError()
+        return txt.decode('utf8')
 
-
-def UI_CreateWindow():
-    def OnBtnUp(event):
-        main_old()
-    app = tk.Tk()
-    app['width']  = 400
-    app['height'] = 300
-    app.bind('<ButtonRelease-1>', OnBtnUp)
-    return app
+    def quit(self):
+        self.so.close()
+        print("Client Close")
 
 
-# Entry 
 def main():
-    app = UI_CreateWindow()
-    print('Click on Window to send message ...')
-    print('-----------------------------------')
-    app.mainloop()
-    print('-----------------------------------')
-    print('End')
-
-
+    inst = ChatClient()
+    inst.send('hello java world')
+    txt = inst.recv()
+    print('RECV:', txt)
+    inst.quit()
 
 if __name__ == '__main__':
     main()
