@@ -2,6 +2,9 @@
 import socket
 import select
 
+# print() 打印非常慢
+# 服务端应尽量避免向控制台打印信息
+
 
 def CreateServer():
     # create an INET, STREAMing socket
@@ -30,12 +33,11 @@ def Connection(server):
 
 def ChatProc(client):
     # <class bytes>
-    print(' * RECV')
     # When a recv() returns 0 bytes, it means
     # the other side has closed (or is in the
     # process of closing) the connection.
     req = client.recv(4096)
-    print(' * RECV ok', len(req))
+    #print(' * RECV ok', len(req))
     if len(req) == 0:
         client.close()
         potential_readers.discard( client )
@@ -64,8 +66,6 @@ potential_readers.add( so )
 
 
 while True:
-    print('.')
-
     rs, ws, es = select.select(
             potential_readers,
             potential_writers,
